@@ -59,4 +59,33 @@ pipeline {
             }
         }
     }
+
+    post {
+
+        success {
+            withCredentials([string(
+                credentialsId: 'discord-webhook',
+                variable: 'DISCORD_WEBHOOK'
+            )]) {
+                sh '''
+                    curl -H "Content-Type: application/json" \
+                    -d "{\"content\":\"Jenkins Job: ${JOB_NAME} | Build: #${BUILD_NUMBER} | Status: SUCCESS\"}" \
+                    "$DISCORD_WEBHOOK"
+                '''
+            }
+        }
+
+        failure {
+            withCredentials([string(
+                credentialsId: 'discord-webhook',
+                variable: 'DISCORD_WEBHOOK'
+            )]) {
+                sh '''
+                    curl -H "Content-Type: application/json" \
+                    -d "{\"content\":\"Jenkins Job: ${JOB_NAME} | Build: #${BUILD_NUMBER} | Status: FAILURE\"}" \
+                    "$DISCORD_WEBHOOK"
+                '''
+            }
+        }
+    }
 }
