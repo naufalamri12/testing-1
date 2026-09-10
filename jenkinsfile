@@ -1,6 +1,6 @@
-def secret = 'amri'
+def secret = 'ubuntu'
 def server = 'ubuntu@ip-172-31-12-214'
-def directory = 'dumbflix-frontend'
+def directory = '~/dumbflix-frontend'
 def branch = 'main'
 def image  = 'dumbflix-frontend:laters'
 
