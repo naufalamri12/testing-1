@@ -2,13 +2,15 @@ def secret = 'ubuntu'
 def server = 'ubuntu@ip-172-31-12-214'
 def directory = '~/dumbflix-frontend'
 def branch = 'main'
-def image  = 'dumbflix-frontend:laters'
+def image = 'dumbflix-frontend:latest'
 
-pipeline{
+pipeline {
     agent any
-    stages{
-        stage ('pulling new code'){
-            steps{
+
+    stages {
+
+        stage('Pulling New Code') {
+            steps {
                 sshagent([secret]) {
                     sh """ssh -o StrictHostKeyChecking=no ${server} << EOF
                     cd ${directory}
@@ -18,8 +20,9 @@ pipeline{
                 }
             }
         }
-    stage ('build apps'){
-            steps{
+
+        stage('Build Apps') {
+            steps {
                 sshagent([secret]) {
                     sh """ssh -o StrictHostKeyChecking=no ${server} << EOF
                     cd ${directory}
@@ -30,7 +33,7 @@ pipeline{
             }
         }
 
-    stage ('Test Application') {
+        stage('Test Application') {
             steps {
                 sshagent([secret]) {
                     sh """ssh -o StrictHostKeyChecking=no ${server} << EOF
@@ -41,29 +44,18 @@ pipeline{
                 }
             }
         }
-    stage('Push to Docker Hub') {
-       steps {
-          sshagent([secret]) {
-               sh """ssh -o StrictHostKeyChecking=no ${server} << EOF
-               cd ${directory}
-               echo "docker push"
-               exit
-               EOF"""
-            }
-          }
-      }
 
-    stage('Deploy Application') {
-       steps {
-        sshagent([secret]) {
-        sh """ssh -o StrictHostKeyChecking=no ${server} << EOF
-        cd ${directory}
-        docker compose pull
-        docker compose up -d
-        exit
-        EOF"""
+        stage('Deploy Application') {
+            steps {
+                sshagent([secret]) {
+                    sh """ssh -o StrictHostKeyChecking=no ${server} << EOF
+                    cd ${directory}
+                    docker compose down
+                    docker compose up -d --build
+                    exit
+                    EOF"""
                 }
             }
         }
     }
-
+}
