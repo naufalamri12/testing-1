@@ -1,4 +1,4 @@
-def secret = 'ubuntu'
+def secret = 'global'
 def server = 'ubuntu@ip-172-31-12-214'
 def directory = '~/dumbflix-frontend'
 def branch = 'main'
