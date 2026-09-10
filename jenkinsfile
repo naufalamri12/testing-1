@@ -1,0 +1,69 @@
+def secret = 'amri'
+def server = 'ubuntu@ip-172-31-12-214'
+def directory = 'dumbflix-frontend'
+def branch = 'main'
+def image  = 'dumbflix-frontend:laters'
+
+pipeline{
+    agent any
+    stages{
+        stage ('pulling new code'){
+            steps{
+                sshagent([secret]) {
+                    sh """ssh -o StrictHostKeyChecking=no ${server} << EOF
+                    cd ${directory}
+                    git pull origin ${branch}
+                    exit
+                    EOF"""
+                }
+            }
+        }
+    stage ('build apps'){
+            steps{
+                sshagent([secret]) {
+                    sh """ssh -o StrictHostKeyChecking=no ${server} << EOF
+                    cd ${directory}
+                    docker build -t ${image} .
+                    exit
+                    EOF"""
+                }
+            }
+        }
+
+    stage ('Test Application') {
+            steps {
+                sshagent([secret]) {
+                    sh """ssh -o StrictHostKeyChecking=no ${server} << EOF
+                    cd ${directory}
+                    docker run --rm ${image} npm test
+                    exit
+                    EOF"""
+                }
+            }
+        }
+    stage('Push to Docker Hub') {
+       steps {
+          sshagent([secret]) {
+               sh """ssh -o StrictHostKeyChecking=no ${server} << EOF
+               cd ${directory}
+               echo "docker push"
+               exit
+               EOF"""
+            }
+          }
+      }
+
+    stage('Deploy Application') {
+       steps {
+        sshagent([secret]) {
+        sh """ssh -o StrictHostKeyChecking=no ${server} << EOF
+        cd ${directory}
+        docker compose pull
+        docker compose up -d
+        exit
+        EOF"""
+                }
+            }
+        }
+    }
+
