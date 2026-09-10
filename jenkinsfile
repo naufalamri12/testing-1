@@ -1,4 +1,4 @@
-def secret = 'global'
+def secret = 'ubuntu'
 def server = 'ubuntu@ip-172-31-12-214'
 def directory = '~/dumbflix-frontend'
 def branch = 'main'
@@ -14,6 +14,7 @@ pipeline {
                 sshagent([secret]) {
                     sh """ssh -o StrictHostKeyChecking=no ${server} << EOF
                     cd ${directory}
+                    git reset --hard HEAD
                     git pull origin ${branch}
                     exit
                     EOF"""
